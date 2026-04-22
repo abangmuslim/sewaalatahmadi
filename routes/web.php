@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Landing\LandingController;
 use App\Http\Controllers\Auth\ControllerAuthUser;
+use App\Http\Controllers\Master\ControllerUser;
 
 
 /*
 |--------------------------------------------------------------------------
 | AUTH (TAMU)
 |--------------------------------------------------------------------------
-| Semua halaman login/register hanya untuk yang belum login
 */
 
 Route::prefix('auth')->group(function () {
@@ -28,63 +28,74 @@ Route::prefix('auth')->group(function () {
         Route::get('/logout', [ControllerAuthUser::class, 'logout'])->name('logout');
     });
 
-    // PENYEWA (sementara masih view)
+    // PENYEWA
     Route::prefix('penyewa')->name('auth.penyewa.')->group(function () {
-        Route::get('/login', function () {
-            return view('auth.loginpenyewa');
-        })->name('login');
-
-        Route::get('/register', function () {
-            return view('auth.registerpenyewa');
-        })->name('register');
+        Route::get('/login', fn() => view('auth.loginpenyewa'))->name('login');
+        Route::get('/register', fn() => view('auth.registerpenyewa'))->name('register');
     });
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| LANDING / TAMU
+| LANDING (TAMU)
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('/')->group(function () {
+Route::controller(LandingController::class)->group(function () {
 
-    // HOME
-    Route::get('/', [LandingController::class, 'home'])->name('home');
+    Route::get('/', 'home')->name('home');
 
-    // ARTIKEL
-    Route::get('/detailartikel/{id}', [LandingController::class, 'detailArtikel'])->name('detailartikel');
+    Route::get('/detailartikel/{id}', 'detailArtikel')->name('detailartikel');
 
-    // KATEGORI
-    Route::get('/daftarkategori', [LandingController::class, 'daftarKategori'])->name('daftarkategori');
-    Route::get('/kategori/{id}', [LandingController::class, 'kategori'])->name('kategori');
+    Route::get('/daftarkategori', 'daftarKategori')->name('daftarkategori');
+    Route::get('/kategori/{id}', 'kategori')->name('kategori');
 
-    // TAG
-    Route::get('/tag/{tag}', [LandingController::class, 'tag'])->name('tag');
+    Route::get('/tag/{tag}', 'tag')->name('tag');
 
-    // HALAMAN STATIS
-    Route::get('/tentang', [LandingController::class, 'tentang'])->name('tentang');
-    Route::get('/kontak', [LandingController::class, 'kontak'])->name('kontak');
-    Route::get('/daftarisi', [LandingController::class, 'daftarIsi'])->name('daftarisi');
-
+    Route::get('/tentang', 'tentang')->name('tentang');
+    Route::get('/kontak', 'kontak')->name('kontak');
+    Route::get('/daftarisi', 'daftarIsi')->name('daftarisi');
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD USER (ADMIN & PETUGAS)
+| ZONA USER (ADMIN & PETUGAS)
 |--------------------------------------------------------------------------
-| (NANTI WAJIB pakai middleware)
 */
 
-Route::prefix('dashboard')->group(function () {
+Route::prefix('user')
+    ->middleware(['role:admin,petugas'])
+    ->group(function () {
 
-    Route::get('/admin', function () {
-        return view('user.dashboard.dashboardadmin');
-    })->name('dashboard.admin');
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD
+        |--------------------------------------------------------------------------
+        */
 
-    Route::get('/petugas', function () {
-        return view('user.dashboard.dashboardpetugas');
-    })->name('dashboard.petugas');
+        Route::prefix('dashboard')->group(function () {
+            Route::view('/admin', 'user.dashboard.dashboardadmin')->name('dashboard.admin');
+            Route::view('/petugas', 'user.dashboard.dashboardpetugas')->name('dashboard.petugas');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASTER USER
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('master-user')->name('user.')->group(function () {
+
+            Route::get('/', [ControllerUser::class, 'index'])->name('index');
+            Route::get('/create', [ControllerUser::class, 'create'])->name('create');
+            Route::post('/store', [ControllerUser::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [ControllerUser::class, 'edit'])->name('edit');
+            Route::put('/update/{id}', [ControllerUser::class, 'update'])->name('update');
+            Route::get('/show/{id}', [ControllerUser::class, 'show'])->name('show');
+            Route::delete('/delete/{id}', [ControllerUser::class, 'destroy'])->name('delete');
+
+        });
 
 });
