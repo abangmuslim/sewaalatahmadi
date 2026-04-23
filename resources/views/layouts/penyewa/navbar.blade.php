@@ -17,21 +17,32 @@
     {{-- Right --}}
     <ul class="navbar-nav ml-auto">
 
+        {{-- Menu (sesuai treediagram) --}}
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="{{ route('penyewa.dashboard') }}" class="nav-link">
+                Dashboard
+            </a>
+        </li>
+
+        <li class="nav-item d-none d-sm-inline-block">
+            {{-- route belum aktif --}}
+            <a href="#" class="nav-link">
+                Pemesanan
+            </a>
+        </li>
+
         {{-- Nama Penyewa --}}
         <li class="nav-item d-none d-sm-block">
             <span class="nav-link text-sm">
-                {{ auth()->guard('penyewa')->user()->nama }}
+                {{ session('nama') }}
             </span>
         </li>
 
         {{-- Logout --}}
         <li class="nav-item">
-            <form action="/logout-penyewa" method="POST">
-                @csrf
-                <button class="btn btn-danger btn-sm">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </form>
+            <a href="{{ route('auth.penyewa.logout') }}" class="btn btn-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
         </li>
 
     </ul>

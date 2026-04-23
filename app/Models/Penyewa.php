@@ -16,10 +16,9 @@ class Penyewa extends Model
         'password',
         'hp',
         'alamat',
-        'foto',
     ];
 
-    // Auto hash password (biar konsisten kayak User)
+    // Auto hash password
     public function setPasswordAttribute($value)
     {
         if (!empty($value)) {

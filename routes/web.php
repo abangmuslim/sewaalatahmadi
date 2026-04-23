@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Landing\LandingController;
 use App\Http\Controllers\Auth\ControllerAuthUser;
+use App\Http\Controllers\Auth\PenyewaAuthController;
 use App\Http\Controllers\Master\ControllerUser;
 use App\Http\Controllers\Master\PenyewaController;
+use App\Http\Controllers\Dashboard\PenyewaDashboardController;
 
 
 /*
@@ -22,17 +24,22 @@ use App\Http\Controllers\Master\PenyewaController;
 
 Route::prefix('auth')->group(function () {
 
-    // USER (ADMIN & PETUGAS)
+    // ================= USER =================
     Route::prefix('user')->name('auth.user.')->group(function () {
         Route::get('/login', [ControllerAuthUser::class, 'login'])->name('login');
         Route::post('/login', [ControllerAuthUser::class, 'prosesLogin'])->name('proses');
         Route::get('/logout', [ControllerAuthUser::class, 'logout'])->name('logout');
     });
 
-    // PENYEWA
+    // ================= PENYEWA =================
     Route::prefix('penyewa')->name('auth.penyewa.')->group(function () {
-        Route::get('/login', fn() => view('auth.loginpenyewa'))->name('login');
-        Route::get('/register', fn() => view('auth.registerpenyewa'))->name('register');
+        Route::get('/login', [PenyewaAuthController::class, 'login'])->name('login');
+        Route::post('/login', [PenyewaAuthController::class, 'prosesLogin'])->name('proses');
+
+        Route::get('/register', [PenyewaAuthController::class, 'register'])->name('register');
+        Route::post('/register', [PenyewaAuthController::class, 'prosesRegister'])->name('store');
+
+        Route::get('/logout', [PenyewaAuthController::class, 'logout'])->name('logout');
     });
 });
 
@@ -66,29 +73,26 @@ Route::controller(LandingController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('user')
-    ->middleware(['role:admin,petugas'])
-    ->group(function () {
+Route::prefix('user')->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD
-        |--------------------------------------------------------------------------
-        */
+    // ================= DASHBOARD =================
+    Route::prefix('dashboard')->group(function () {
 
-        Route::prefix('dashboard')->group(function () {
-            Route::view('/admin', 'user.dashboard.dashboardadmin')->name('dashboard.admin');
-            Route::view('/petugas', 'user.dashboard.dashboardpetugas')->name('dashboard.petugas');
-        });
+        Route::view('/admin', 'user.dashboard.dashboardadmin')
+            ->middleware('role:admin')
+            ->name('dashboard.admin');
 
-        /*
-        |--------------------------------------------------------------------------
-        | MASTER USER
-        |--------------------------------------------------------------------------
-        */
+        Route::view('/petugas', 'user.dashboard.dashboardpetugas')
+            ->middleware('role:petugas')
+            ->name('dashboard.petugas');
+    });
 
-        // ================= MASTER USER =================
-        Route::prefix('master-user')->name('user.')->group(function () {
+
+    // ================= MASTER USER (ADMIN ONLY) =================
+    Route::prefix('master-user')
+        ->middleware('role:admin')
+        ->name('user.')
+        ->group(function () {
 
             Route::get('/', [ControllerUser::class, 'index'])->name('index');
             Route::get('/create', [ControllerUser::class, 'create'])->name('create');
@@ -100,8 +104,11 @@ Route::prefix('user')
         });
 
 
-        // ================= MASTER PENYEWA =================
-        Route::prefix('master-penyewa')->name('penyewa.')->group(function () {
+    // ================= MASTER PENYEWA (ADMIN ONLY) =================
+    Route::prefix('master-penyewa')
+        ->middleware('role:admin')
+        ->name('penyewa.')
+        ->group(function () {
 
             Route::get('/', [PenyewaController::class, 'index'])->name('index');
             Route::get('/create', [PenyewaController::class, 'create'])->name('create');
@@ -111,4 +118,20 @@ Route::prefix('user')
             Route::get('/show/{id}', [PenyewaController::class, 'show'])->name('show');
             Route::delete('/delete/{id}', [PenyewaController::class, 'destroy'])->name('delete');
         });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| ZONA PENYEWA (SETELAH LOGIN)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('penyewa')
+    ->middleware(['penyewa'])
+    ->group(function () {
+
+        Route::get('/dashboard', [PenyewaDashboardController::class, 'index'])
+            ->name('penyewa.dashboard');
+
     });

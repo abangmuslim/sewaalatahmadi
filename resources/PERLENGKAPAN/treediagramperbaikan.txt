@@ -8,7 +8,7 @@ sewaalatahmadi/
 │   │   │   │   └── PenyewaAuthController.php
 │   │   │   │
 │   │   │   ├── Dashboard/
-│   │   │   │   ├── DashboardController.php
+│   │   │   │   ├── UserDashboardController.php
 │   │   │   │   └── PenyewaDashboardController.php
 │   │   │   │
 │   │   │   ├── Master/
