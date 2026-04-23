@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Landing\LandingController;
 use App\Http\Controllers\Auth\ControllerAuthUser;
 use App\Http\Controllers\Master\ControllerUser;
+use App\Http\Controllers\Master\PenyewaController;
 
 
 /*
@@ -86,6 +87,7 @@ Route::prefix('user')
         |--------------------------------------------------------------------------
         */
 
+        // ================= MASTER USER =================
         Route::prefix('master-user')->name('user.')->group(function () {
 
             Route::get('/', [ControllerUser::class, 'index'])->name('index');
@@ -95,7 +97,18 @@ Route::prefix('user')
             Route::put('/update/{id}', [ControllerUser::class, 'update'])->name('update');
             Route::get('/show/{id}', [ControllerUser::class, 'show'])->name('show');
             Route::delete('/delete/{id}', [ControllerUser::class, 'destroy'])->name('delete');
-
         });
 
-});
+
+        // ================= MASTER PENYEWA =================
+        Route::prefix('master-penyewa')->name('penyewa.')->group(function () {
+
+            Route::get('/', [PenyewaController::class, 'index'])->name('index');
+            Route::get('/create', [PenyewaController::class, 'create'])->name('create');
+            Route::post('/store', [PenyewaController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [PenyewaController::class, 'edit'])->name('edit');
+            Route::put('/update/{id}', [PenyewaController::class, 'update'])->name('update');
+            Route::get('/show/{id}', [PenyewaController::class, 'show'])->name('show');
+            Route::delete('/delete/{id}', [PenyewaController::class, 'destroy'])->name('delete');
+        });
+    });

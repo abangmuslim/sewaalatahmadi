@@ -28,7 +28,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="/penyewa" class="nav-link">
+                    <a href="{{ route('penyewa.index') }}" class="nav-link">
                         <i class="nav-icon fas fa-user"></i>
                         <p>Penyewa</p>
                     </a>
