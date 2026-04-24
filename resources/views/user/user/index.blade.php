@@ -26,6 +26,7 @@
               <th>Aksi</th>
             </tr>
           </thead>
+
           <tbody>
             @foreach($data as $i => $d)
             <tr>
@@ -38,16 +39,29 @@
                 </span>
               </td>
               <td>
-                <a href="{{ route('user.show',$d->iduser) }}" class="btn btn-info btn-sm">Detail</a>
-                <a href="{{ route('user.edit',$d->iduser) }}" class="btn btn-warning btn-sm">Edit</a>
-                <form action="{{ route('user.delete',$d->iduser) }}" method="POST" style="display:inline">
-                  @csrf @method('DELETE')
-                  <button onclick="return confirm('Hapus data?')" class="btn btn-danger btn-sm">Hapus</button>
+
+                <a href="{{ route('user.show', $d->iduser) }}" class="btn btn-info btn-sm">
+                  Detail
+                </a>
+
+                <a href="{{ route('user.edit', $d->iduser) }}" class="btn btn-warning btn-sm">
+                  Edit
+                </a>
+
+                <form action="{{ route('user.destroy', $d->iduser) }}" method="POST" style="display:inline">
+                  @csrf
+                  @method('DELETE')
+
+                  <button onclick="return confirm('Hapus data?')" class="btn btn-danger btn-sm">
+                    Hapus
+                  </button>
                 </form>
+
               </td>
             </tr>
             @endforeach
           </tbody>
+
         </table>
       </div>
     </div>
@@ -55,7 +69,3 @@
   </div>
 </div>
 @endsection
-
-
-
-

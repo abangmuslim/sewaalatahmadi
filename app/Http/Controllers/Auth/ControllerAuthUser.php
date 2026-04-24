@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ModelUser;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class ControllerAuthUser extends Controller
 {
@@ -42,18 +42,25 @@ class ControllerAuthUser extends Controller
             return back()->with('error', 'Password salah');
         }
 
-        // SIMPAN SESSION
-        Session::put('login', true);
-        Session::put('iduser', $user->iduser);
-        Session::put('nama', $user->nama);
-        Session::put('role', $user->role);
+        // 🔥 login pakai guard web
+        Auth::guard('web')->login($user);
 
-        // REDIRECT BERDASARKAN ROLE
-        if ($user->role == 'admin') {
-            return redirect()->route('dashboard.admin');
-        } else {
-            return redirect()->route('dashboard.petugas');
-        }
+        // 🔥 penting untuk cegah session hijack / balik login
+        $request->session()->regenerate();
+
+        // 🔥 simpan role ke session (untuk UI sidebar kamu)
+        session([
+            'role' => $user->role,
+            'nama' => $user->nama
+        ]);
+
+        // 🔥 redirect berdasarkan role
+        return match ($user->role) {
+            'admin'   => redirect()->route('dashboard.admin'),
+            'petugas' => redirect()->route('dashboard.petugas'),
+            default   => redirect()->route('login.user')
+                ->with('error', 'Role tidak valid'),
+        };
     }
 
     /*
@@ -63,7 +70,12 @@ class ControllerAuthUser extends Controller
     */
     public function logout()
     {
-        Session::flush();
-        return redirect()->route('auth.user.login')->with('success', 'Berhasil logout');
+        Auth::logout();
+
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login.user')
+            ->with('success', 'Berhasil logout');
     }
 }

@@ -40,7 +40,7 @@
                                 <a href="{{ route('penyewa.show', $row->idpenyewa) }}" class="btn btn-info btn-sm">Detail</a>
                                 <a href="{{ route('penyewa.edit', $row->idpenyewa) }}" class="btn btn-warning btn-sm">Edit</a>
 
-                                <form action="{{ route('penyewa.delete', $row->idpenyewa) }}" method="POST" class="d-inline">
+                                <form action="{{ route('penyewa.destroy', $row->idpenyewa) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button onclick="return confirm('Hapus data?')" class="btn btn-danger btn-sm">

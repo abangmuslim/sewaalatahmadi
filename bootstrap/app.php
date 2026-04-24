@@ -4,7 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
-// Middleware custom
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\PenyewaMiddleware;
 
@@ -16,18 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        /*
-        |--------------------------------------------------------------------------
-        | ALIAS MIDDLEWARE
-        |--------------------------------------------------------------------------
-        | Digunakan seperti:
-        | ->middleware(['role:admin'])
-        | ->middleware(['penyewa'])
-        */
-
         $middleware->alias([
-            'role'     => RoleMiddleware::class,
-            'penyewa'  => PenyewaMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'penyewa' => PenyewaMiddleware::class,
         ]);
 
     })

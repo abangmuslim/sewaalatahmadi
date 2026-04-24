@@ -1,3 +1,6 @@
+{{-- ============================= --}}
+{{-- layouts/penyewa/navbar.blade.php --}}
+{{-- ============================= --}}
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
 
     {{-- Toggle sidebar --}}
@@ -17,15 +20,15 @@
     {{-- Right --}}
     <ul class="navbar-nav ml-auto">
 
-        {{-- Menu (sesuai treediagram) --}}
+        {{-- Dashboard --}}
         <li class="nav-item d-none d-sm-inline-block">
             <a href="{{ route('penyewa.dashboard') }}" class="nav-link">
                 Dashboard
             </a>
         </li>
 
+        {{-- Pemesanan (placeholder) --}}
         <li class="nav-item d-none d-sm-inline-block">
-            {{-- route belum aktif --}}
             <a href="#" class="nav-link">
                 Pemesanan
             </a>
@@ -40,9 +43,12 @@
 
         {{-- Logout --}}
         <li class="nav-item">
-            <a href="{{ route('auth.penyewa.logout') }}" class="btn btn-danger btn-sm">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
+            <form action="{{ route('logout.penyewa') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
         </li>
 
     </ul>

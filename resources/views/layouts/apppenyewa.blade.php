@@ -1,6 +1,5 @@
-
 {{-- ============================= --}}
-{{-- apppenyewa.blade.php (Mobile Friendly) --}}
+{{-- apppenyewa.blade.php (Mobile Friendly FINAL FIX) --}}
 {{-- ============================= --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -34,10 +33,11 @@
             text-align: center;
             font-size: 12px;
             color: #333;
+            text-decoration: none;
         }
 
         .content-wrapper {
-            padding-bottom: 70px; /* space for bottom nav */
+            padding-bottom: 70px;
         }
     </style>
 </head>
@@ -48,7 +48,7 @@
     {{-- Navbar --}}
     @include('layouts.penyewa.navbar')
 
-    {{-- Sidebar (tetap ada untuk desktop) --}}
+    {{-- Sidebar --}}
     @include('layouts.penyewa.sidebar')
 
     {{-- Content --}}
@@ -63,23 +63,29 @@
     {{-- Footer --}}
     @include('layouts.penyewa.footer')
 
-    {{-- Bottom Navigation (Mobile UX) --}}
+    {{-- Bottom Navigation --}}
     <div class="bottom-nav d-md-none">
-        <a href="/penyewa/dashboard">
+
+        <a href="{{ route('penyewa.dashboard') }}">
             <i class="fas fa-home"></i><br>
             Home
         </a>
-        <a href="/penyewa/pemesanan">
+
+        <a href="#">
             <i class="fas fa-shopping-cart"></i><br>
             Pesan
         </a>
-        <a href="/logout-penyewa" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+
+        <a href="{{ route('logout.penyewa') }}"
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="fas fa-sign-out-alt"></i><br>
             Logout
         </a>
+
     </div>
 
-    <form id="logout-form" action="/logout-penyewa" method="POST" class="d-none">
+    {{-- Logout Form --}}
+    <form id="logout-form" action="{{ route('logout.penyewa') }}" method="POST" class="d-none">
         @csrf
     </form>
 

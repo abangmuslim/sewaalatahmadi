@@ -18,9 +18,9 @@
     {{-- Navbar --}}
     @include('layouts.user.navbar')
 
-    {{-- Sidebar berdasarkan role (SESSION, bukan auth()) --}}
+    {{-- ROLE DARI AUTH (BUKAN SESSION) --}}
     @php
-        $role = session('role');
+        $role = Auth::user()->role ?? null;
     @endphp
 
     @if($role === 'admin')
@@ -28,9 +28,8 @@
     @elseif($role === 'petugas')
         @include('layouts.user.sidebarpetugas')
     @else
-        {{-- fallback kalau belum login / session hilang --}}
         <script>
-            window.location.href = "{{ route('auth.user.login') }}";
+            window.location.href = "{{ route('login.user') }}";
         </script>
     @endif
 

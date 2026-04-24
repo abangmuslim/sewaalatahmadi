@@ -5,20 +5,26 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Penyewa;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class PenyewaAuthController extends Controller
 {
     /*
-    |--------------------------------------------------------------------------
-    | LOGIN
-    |--------------------------------------------------------------------------
+    =========================
+    LOGIN FORM
+    =========================
     */
-
     public function login()
     {
         return view('auth.loginpenyewa');
     }
 
+    /*
+    =========================
+    PROSES LOGIN
+    =========================
+    */
     public function prosesLogin(Request $request)
     {
         $request->validate([
@@ -26,29 +32,33 @@ class PenyewaAuthController extends Controller
             'password' => 'required',
         ]);
 
-        $data = Penyewa::where('username', $request->username)->first();
+        $penyewa = Penyewa::where('username', $request->username)->first();
 
-        if (!$data || !password_verify($request->password, $data->password)) {
+        if (!$penyewa || !Hash::check($request->password, $penyewa->password)) {
             return back()->with('error', 'Username atau password salah');
         }
 
-        session([
-            'login'      => true,
-            'idpenyewa'  => $data->idpenyewa,
-            'nama'       => $data->nama,
-            'guard'      => 'penyewa',
+        // 🔥 HAPUS SESSION LAMA (AMAN)
+        Session::invalidate();
+        Session::regenerateToken();
+
+        // 🔐 SET SESSION PENYEWA
+        Session::put([
+            'login'     => true,
+            'guard'     => 'penyewa',
+            'role'      => 'penyewa',
+            'idpenyewa' => $penyewa->idpenyewa,
+            'nama'      => $penyewa->nama,
         ]);
 
-        // ✅ pakai route name (lebih aman)
         return redirect()->route('penyewa.dashboard');
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | REGISTER
-    |--------------------------------------------------------------------------
+    =========================
+    REGISTER
+    =========================
     */
-
     public function register()
     {
         return view('auth.registerpenyewa');
@@ -69,22 +79,24 @@ class PenyewaAuthController extends Controller
             'username' => $request->username,
             'hp'       => $request->hp,
             'alamat'   => $request->alamat,
-            'password' => $request->password, // auto hash di model
+            'password' => $request->password,
         ]);
 
-        return redirect()->route('auth.penyewa.login')
+        return redirect()->route('login.penyewa')
             ->with('success', 'Registrasi berhasil, silakan login');
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
+    =========================
+    LOGOUT
+    =========================
     */
-
     public function logout()
     {
-        session()->flush();
-        return redirect()->route('auth.penyewa.login');
+        Session::flush();
+        Session::invalidate();
+        Session::regenerateToken();
+
+        return redirect()->route('login.penyewa');
     }
 }

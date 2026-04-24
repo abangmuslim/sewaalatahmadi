@@ -1,137 +1,115 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| CONTROLLER
-|--------------------------------------------------------------------------
-*/
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\Landing\LandingController;
+
 use App\Http\Controllers\Auth\ControllerAuthUser;
 use App\Http\Controllers\Auth\PenyewaAuthController;
-use App\Http\Controllers\Master\ControllerUser;
-use App\Http\Controllers\Master\PenyewaController;
+
 use App\Http\Controllers\Dashboard\PenyewaDashboardController;
 
+use App\Http\Controllers\Master\ControllerUser;
+use App\Http\Controllers\Master\PenyewaController;
+
+use App\Http\Controllers\Transaksi\ArtikelController;
+use App\Http\Controllers\Transaksi\KomentarController;
 
 /*
 |--------------------------------------------------------------------------
-| AUTH (TAMU)
+| LOGIN REDIRECT
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('auth')->group(function () {
-
-    // ================= USER =================
-    Route::prefix('user')->name('auth.user.')->group(function () {
-        Route::get('/login', [ControllerAuthUser::class, 'login'])->name('login');
-        Route::post('/login', [ControllerAuthUser::class, 'prosesLogin'])->name('proses');
-        Route::get('/logout', [ControllerAuthUser::class, 'logout'])->name('logout');
-    });
-
-    // ================= PENYEWA =================
-    Route::prefix('penyewa')->name('auth.penyewa.')->group(function () {
-        Route::get('/login', [PenyewaAuthController::class, 'login'])->name('login');
-        Route::post('/login', [PenyewaAuthController::class, 'prosesLogin'])->name('proses');
-
-        Route::get('/register', [PenyewaAuthController::class, 'register'])->name('register');
-        Route::post('/register', [PenyewaAuthController::class, 'prosesRegister'])->name('store');
-
-        Route::get('/logout', [PenyewaAuthController::class, 'logout'])->name('logout');
-    });
-});
-
+Route::get('/login', fn() => redirect()->route('login.user'))->name('login');
 
 /*
 |--------------------------------------------------------------------------
-| LANDING (TAMU)
+| LANDING (PUBLIC)
 |--------------------------------------------------------------------------
 */
-
-Route::controller(LandingController::class)->group(function () {
+Route::controller(LandingController::class)->name('landing.')->group(function () {
 
     Route::get('/', 'home')->name('home');
-
     Route::get('/detailartikel/{id}', 'detailArtikel')->name('detailartikel');
-
     Route::get('/daftarkategori', 'daftarKategori')->name('daftarkategori');
     Route::get('/kategori/{id}', 'kategori')->name('kategori');
-
     Route::get('/tag/{tag}', 'tag')->name('tag');
-
     Route::get('/tentang', 'tentang')->name('tentang');
     Route::get('/kontak', 'kontak')->name('kontak');
     Route::get('/daftarisi', 'daftarIsi')->name('daftarisi');
 });
 
+/*
+|--------------------------------------------------------------------------
+| AUTH USER (ADMIN & PETUGAS)
+|--------------------------------------------------------------------------
+*/
+Route::get('/loginuser', [ControllerAuthUser::class, 'login'])->name('login.user');
+Route::post('/loginuser', [ControllerAuthUser::class, 'prosesLogin'])->name('login.user.post');
+Route::post('/logoutuser', [ControllerAuthUser::class, 'logout'])->name('logout.user');
 
 /*
 |--------------------------------------------------------------------------
-| ZONA USER (ADMIN & PETUGAS)
+| AUTH PENYEWA (SESSION MANUAL)
 |--------------------------------------------------------------------------
 */
+Route::get('/loginpenyewa', [PenyewaAuthController::class, 'login'])->name('login.penyewa');
+Route::post('/loginpenyewa', [PenyewaAuthController::class, 'prosesLogin'])->name('login.penyewa.post');
 
-Route::prefix('user')->group(function () {
+Route::get('/registerpenyewa', [PenyewaAuthController::class, 'register'])->name('register.penyewa');
+Route::post('/registerpenyewa', [PenyewaAuthController::class, 'prosesRegister'])->name('register.penyewa.post');
 
-    // ================= DASHBOARD =================
-    Route::prefix('dashboard')->group(function () {
+Route::post('/logoutpenyewa', [PenyewaAuthController::class, 'logout'])->name('logout.penyewa');
 
-        Route::view('/admin', 'user.dashboard.dashboardadmin')
+/*
+|--------------------------------------------------------------------------
+| BACKEND ADMIN & PETUGAS
+|--------------------------------------------------------------------------
+*/
+Route::prefix('dashboard')
+    ->middleware(['auth:web', 'role:admin,petugas'])
+    ->group(function () {
+
+        Route::get('/', function () {
+            $user = Auth::user();
+
+            return match ($user->role) {
+                'admin' => redirect()->route('dashboard.admin'),
+                'petugas' => redirect()->route('dashboard.petugas'),
+                default => redirect()->route('login.user'),
+            };
+        })->name('dashboard');
+
+        Route::get('/admin', fn() => view('user.dashboard.dashboardadmin'))
             ->middleware('role:admin')
             ->name('dashboard.admin');
 
-        Route::view('/petugas', 'user.dashboard.dashboardpetugas')
+        Route::get('/petugas', fn() => view('user.dashboard.dashboardpetugas'))
             ->middleware('role:petugas')
             ->name('dashboard.petugas');
+
+        Route::middleware('role:admin')->group(function () {
+            Route::resource('user', ControllerUser::class);
+        });
+
+        Route::middleware('role:admin,petugas')->group(function () {
+            Route::resource('penyewa', PenyewaController::class);
+            Route::resource('artikel', ArtikelController::class);
+            Route::resource('komentar', KomentarController::class);
+        });
     });
-
-
-    // ================= MASTER USER (ADMIN ONLY) =================
-    Route::prefix('master-user')
-        ->middleware('role:admin')
-        ->name('user.')
-        ->group(function () {
-
-            Route::get('/', [ControllerUser::class, 'index'])->name('index');
-            Route::get('/create', [ControllerUser::class, 'create'])->name('create');
-            Route::post('/store', [ControllerUser::class, 'store'])->name('store');
-            Route::get('/edit/{id}', [ControllerUser::class, 'edit'])->name('edit');
-            Route::put('/update/{id}', [ControllerUser::class, 'update'])->name('update');
-            Route::get('/show/{id}', [ControllerUser::class, 'show'])->name('show');
-            Route::delete('/delete/{id}', [ControllerUser::class, 'destroy'])->name('delete');
-        });
-
-
-    // ================= MASTER PENYEWA (ADMIN ONLY) =================
-    Route::prefix('master-penyewa')
-        ->middleware('role:admin')
-        ->name('penyewa.')
-        ->group(function () {
-
-            Route::get('/', [PenyewaController::class, 'index'])->name('index');
-            Route::get('/create', [PenyewaController::class, 'create'])->name('create');
-            Route::post('/store', [PenyewaController::class, 'store'])->name('store');
-            Route::get('/edit/{id}', [PenyewaController::class, 'edit'])->name('edit');
-            Route::put('/update/{id}', [PenyewaController::class, 'update'])->name('update');
-            Route::get('/show/{id}', [PenyewaController::class, 'show'])->name('show');
-            Route::delete('/delete/{id}', [PenyewaController::class, 'destroy'])->name('delete');
-        });
-});
-
 
 /*
 |--------------------------------------------------------------------------
-| ZONA PENYEWA (SETELAH LOGIN)
+| ZONA PENYEWA (SESSION ONLY)
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('penyewa')
-    ->middleware(['penyewa'])
+    ->middleware([\App\Http\Middleware\PenyewaMiddleware::class])
+    ->name('penyewa.')
     ->group(function () {
-
         Route::get('/dashboard', [PenyewaDashboardController::class, 'index'])
-            ->name('penyewa.dashboard');
-
+            ->name('dashboard');
     });

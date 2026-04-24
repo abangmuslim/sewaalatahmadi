@@ -12,16 +12,17 @@
     {{-- Right navbar --}}
     <ul class="navbar-nav ml-auto">
 
-        {{-- Nama user --}}
+        {{-- USER INFO --}}
         <li class="nav-item d-flex align-items-center mr-3">
             <span class="text-sm">
-                {{ session('nama') }} ({{ session('role') }})
+                {{ Auth::user()->nama }} ({{ Auth::user()->role }})
             </span>
         </li>
 
-        {{-- Logout --}}
+        {{-- LOGOUT --}}
         <li class="nav-item">
-            <form action="{{ route('auth.user.logout') }}" method="GET">
+            <form action="{{ route('logout.user') }}" method="POST">
+                @csrf
                 <button class="btn btn-danger btn-sm">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -29,4 +30,5 @@
         </li>
 
     </ul>
+
 </nav>

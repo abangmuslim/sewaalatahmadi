@@ -12,7 +12,7 @@
 
             <div class="card-body">
 
-                <form action="#" method="POST">
+                <form action="{{ route('login.penyewa.post') }}" method="POST">
                     @csrf
 
                     <div class="form-group">
@@ -35,7 +35,7 @@
 
                 <div class="text-center">
                     Belum punya akun?
-                    <a href="{{ route('auth.penyewa.register') }}">Daftar di sini</a>
+                    <a href="{{ route('register.penyewa') }}">Daftar di sini</a>
                 </div>
 
             </div>

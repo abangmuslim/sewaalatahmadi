@@ -44,7 +44,7 @@ sewaalatahmadi/
 │   │       └── PenyewaMiddleware.php
 │   │
 │   ├── Models/
-│   │   ├── User.php
+│   │   ├── ModelUser.php
 │   │   ├── Penyewa.php
 │   │   ├── Kategori.php
 │   │   ├── Merk.php
