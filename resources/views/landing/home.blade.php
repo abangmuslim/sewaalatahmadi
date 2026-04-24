@@ -4,34 +4,47 @@
 @section('content')
 @php use Illuminate\Support\Str; @endphp
 
-
 {{-- ================= SECTION TITLE ================= --}}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0">Artikel & Informasi</h5>
 </div>
 
-
 {{-- ================= LIST ARTIKEL ================= --}}
 <div class="row">
 
     @forelse($artikels as $item)
-    <div class="col-md-4 col-12">
+    <div class="col-md-4 col-12 mb-3">
 
-        <div class="card h-100 shadow-sm" style="border-radius: 12px;">
+        <div class="card h-100 shadow-sm" style="border-radius: 12px; overflow:hidden;">
 
-            <img src="{{ $item['gambar'] }}" class="card-img-top" style="height:180px; object-fit:cover;">
+            {{-- GAMBAR --}}
+            <img
+                src="{{ !empty($item->gambar) 
+                        ? asset('uploads/artikel/'.$item->gambar) 
+                        : asset('dist/img/no-image.png') }}"
+                class="card-img-top"
+                style="height:180px; object-fit:cover;">
 
             <div class="card-body d-flex flex-column">
 
-                <h6 class="font-weight-bold">
-                    {{ $item['judul'] }}
+                {{-- JUDUL --}}
+                <h6 class="font-weight-bold mb-2">
+                    {{ $item->judul }}
                 </h6>
 
+                {{-- TANGGAL --}}
+                <small class="text-muted mb-2">
+                    {{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}
+                </small>
+
+                {{-- ISI --}}
                 <p class="text-muted small flex-grow-1">
-                    {{ Str::limit($item['isi'], 80) }}
+                    {{ Str::limit(strip_tags($item->isi), 80) }}
                 </p>
 
-                <a href="/detailartikel/{{ $item['id'] }}" class="btn btn-primary btn-sm mt-auto">
+                {{-- BUTTON --}}
+                <a href="{{ route('landing.detailartikel', $item->idartikel) }}"
+                    class="btn btn-primary btn-sm mt-auto">
                     Baca Selengkapnya
                 </a>
 

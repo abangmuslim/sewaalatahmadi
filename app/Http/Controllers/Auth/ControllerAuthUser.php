@@ -42,19 +42,20 @@ class ControllerAuthUser extends Controller
             return back()->with('error', 'Password salah');
         }
 
-        // 🔥 login pakai guard web
+        // ✅ LOGIN
         Auth::guard('web')->login($user);
 
-        // 🔥 penting untuk cegah session hijack / balik login
+        // ✅ REGENERATE SESSION
         $request->session()->regenerate();
 
-        // 🔥 simpan role ke session (untuk UI sidebar kamu)
+        // 🔥 FINAL FIX ADA DI SINI
         session([
-            'role' => $user->role,
-            'nama' => $user->nama
+            'iduser' => $user->iduser, // ⬅️ INI YANG KEMARIN HILANG
+            'role'   => $user->role,
+            'nama'   => $user->nama
         ]);
 
-        // 🔥 redirect berdasarkan role
+        // ✅ REDIRECT ROLE
         return match ($user->role) {
             'admin'   => redirect()->route('dashboard.admin'),
             'petugas' => redirect()->route('dashboard.petugas'),

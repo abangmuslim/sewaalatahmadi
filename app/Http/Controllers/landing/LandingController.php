@@ -3,54 +3,15 @@
 namespace App\Http\Controllers\Landing;
 
 use App\Http\Controllers\Controller;
+use App\Models\Artikel;
 use Illuminate\Http\Request;
 
 class LandingController extends Controller
 {
-    // ================= DATA DUMMY =================
-    private function getArtikel()
-    {
-        return [
-            [
-                'id' => 1,
-                'judul' => 'Sewa Kamera DSLR',
-                'isi' => 'Kamera DSLR berkualitas tinggi untuk kebutuhan fotografi.',
-                'gambar' => 'https://via.placeholder.com/600x300',
-                'kategori_id' => 1,
-                'tag' => 'kamera'
-            ],
-            [
-                'id' => 2,
-                'judul' => 'Sewa Tenda Outdoor',
-                'isi' => 'Tenda kuat untuk kegiatan camping dan outdoor.',
-                'gambar' => 'https://via.placeholder.com/600x300',
-                'kategori_id' => 2,
-                'tag' => 'outdoor'
-            ],
-            [
-                'id' => 3,
-                'judul' => 'Sewa Sound System',
-                'isi' => 'Sound system lengkap untuk acara besar.',
-                'gambar' => 'https://via.placeholder.com/600x300',
-                'kategori_id' => 3,
-                'tag' => 'audio'
-            ],
-        ];
-    }
-
-    private function getKategori()
-    {
-        return [
-            ['id' => 1, 'nama' => 'Kamera'],
-            ['id' => 2, 'nama' => 'Outdoor'],
-            ['id' => 3, 'nama' => 'Audio'],
-        ];
-    }
-
     // ================= HOME =================
     public function home()
     {
-        $artikels = $this->getArtikel();
+        $artikels = Artikel::latest()->get();
 
         return view('landing.home', compact('artikels'));
     }
@@ -58,9 +19,7 @@ class LandingController extends Controller
     // ================= DETAIL ARTIKEL =================
     public function detailArtikel($id)
     {
-        $artikel = collect($this->getArtikel())->firstWhere('id', $id);
-
-        abort_if(!$artikel, 404);
+        $artikel = Artikel::where('idartikel', $id)->firstOrFail();
 
         return view('landing.detailartikel', compact('artikel'));
     }
@@ -68,36 +27,26 @@ class LandingController extends Controller
     // ================= DAFTAR KATEGORI =================
     public function daftarKategori()
     {
-        $kategori = $this->getKategori();
-
-        return view('landing.daftarkategori', compact('kategori'));
+        return view('landing.daftarkategori');
     }
 
-    // ================= ARTIKEL PER KATEGORI =================
+    // ================= KATEGORI =================
     public function kategori($id)
     {
-        $kategori = collect($this->getKategori())->firstWhere('id', $id);
-
-        abort_if(!$kategori, 404);
-
-        $artikels = collect($this->getArtikel())
-                        ->where('kategori_id', $id)
-                        ->values();
+        // sementara kosong karena artikel belum punya kategori
+        $artikels = collect();
 
         return view('landing.kategori', [
             'artikels' => $artikels,
-            'namaKategori' => $kategori['nama']
+            'namaKategori' => 'Kategori'
         ]);
     }
 
     // ================= TAG =================
     public function tag($tag)
     {
-        $artikels = collect($this->getArtikel())
-                        ->filter(function ($item) use ($tag) {
-                            return str_contains(strtolower($item['tag']), strtolower($tag));
-                        })
-                        ->values();
+        // sementara kosong karena belum ada kolom tag
+        $artikels = collect();
 
         return view('landing.tag', compact('artikels', 'tag'));
     }

@@ -31,6 +31,15 @@ class ArtikelController extends Controller
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
+        // ================= CEK SESSION =================
+        $iduser = session('iduser');
+
+        if (!$iduser) {
+            return redirect()->back()
+                ->with('error', 'Session login tidak ditemukan, silakan login ulang');
+        }
+
+        // ================= UPLOAD GAMBAR =================
         $namaFile = null;
 
         if ($request->hasFile('gambar')) {
@@ -39,11 +48,12 @@ class ArtikelController extends Controller
             $file->move(public_path('uploads/artikel'), $namaFile);
         }
 
+        // ================= SIMPAN DATA =================
         Artikel::create([
             'judul' => $request->judul,
             'isi' => $request->isi,
             'gambar' => $namaFile,
-            'iduser' => session('iduser') // custom auth kamu
+            'iduser' => $iduser
         ]);
 
         return redirect()->route('artikel.index')
