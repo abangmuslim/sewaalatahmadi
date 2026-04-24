@@ -15,7 +15,7 @@ class ControllerAuthUser extends Controller
     FORM LOGIN
     =========================
     */
-    public function login()
+    public function login(Request $request)
     {
         return view('auth.loginuser');
     }
@@ -48,20 +48,31 @@ class ControllerAuthUser extends Controller
         // ✅ REGENERATE SESSION
         $request->session()->regenerate();
 
-        // 🔥 FINAL FIX ADA DI SINI
+        // ✅ SESSION SERAGAM
         session([
-            'iduser' => $user->iduser, // ⬅️ INI YANG KEMARIN HILANG
-            'role'   => $user->role,
-            'nama'   => $user->nama
+            'user' => [
+                'iduser' => $user->iduser,
+                'nama'   => $user->nama,
+                'role'   => $user->role
+            ]
         ]);
 
-        // ✅ REDIRECT ROLE
-        return match ($user->role) {
-            'admin'   => redirect()->route('dashboard.admin'),
-            'petugas' => redirect()->route('dashboard.petugas'),
-            default   => redirect()->route('login.user')
-                ->with('error', 'Role tidak valid'),
-        };
+        /*
+        =========================
+        REDIRECT FINAL (CLEAN)
+        =========================
+        */
+
+        // ambil redirect dari query (dari landing/artikel)
+        $redirect = $request->input('redirect');
+
+        // kalau dari halaman publik → balik ke situ
+        if ($redirect && !str_contains($redirect, '/dashboard')) {
+            return redirect($redirect);
+        }
+
+        // selain itu → serahkan ke route dashboard (auto role)
+        return redirect()->route('dashboard');
     }
 
     /*
@@ -73,10 +84,12 @@ class ControllerAuthUser extends Controller
     {
         Auth::logout();
 
+        session()->forget('user');
+
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
-        return redirect()->route('login.user')
+        return redirect()->route('landing.home')
             ->with('success', 'Berhasil logout');
     }
 }

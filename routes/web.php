@@ -33,6 +33,8 @@ Route::controller(LandingController::class)->name('landing.')->group(function ()
 
     Route::get('/', 'home')->name('home');
     Route::get('/detailartikel/{id}', 'detailArtikel')->name('detailartikel');
+    Route::post('/komentar/store', 'storeKomentar')->name('komentar.store');
+
     Route::get('/daftarkategori', 'daftarKategori')->name('daftarkategori');
     Route::get('/kategori/{id}', 'kategori')->name('kategori');
     Route::get('/tag/{tag}', 'tag')->name('tag');
@@ -110,6 +112,8 @@ Route::prefix('penyewa')
     ->middleware([\App\Http\Middleware\PenyewaMiddleware::class])
     ->name('penyewa.')
     ->group(function () {
+
         Route::get('/dashboard', [PenyewaDashboardController::class, 'index'])
             ->name('dashboard');
+
     });

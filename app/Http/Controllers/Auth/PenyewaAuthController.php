@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Penyewa;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 
 class PenyewaAuthController extends Controller
 {
@@ -15,7 +14,7 @@ class PenyewaAuthController extends Controller
     LOGIN FORM
     =========================
     */
-    public function login()
+    public function login(Request $request)
     {
         return view('auth.loginpenyewa');
     }
@@ -38,20 +37,33 @@ class PenyewaAuthController extends Controller
             return back()->with('error', 'Username atau password salah');
         }
 
-        // 🔥 HAPUS SESSION LAMA (AMAN)
-        Session::invalidate();
-        Session::regenerateToken();
+        // 🔐 regenerate session
+        $request->session()->regenerate();
 
-        // 🔐 SET SESSION PENYEWA
-        Session::put([
-            'login'     => true,
-            'guard'     => 'penyewa',
-            'role'      => 'penyewa',
-            'idpenyewa' => $penyewa->idpenyewa,
-            'nama'      => $penyewa->nama,
+        // 🔐 set session penyewa
+        session([
+            'penyewa' => [
+                'idpenyewa' => $penyewa->idpenyewa,
+                'nama'      => $penyewa->nama,
+                'username'  => $penyewa->username,
+            ]
         ]);
 
-        return redirect()->route('penyewa.dashboard');
+        /*
+        =========================
+        REDIRECT PINTAR (FIXED)
+        =========================
+        */
+
+        $redirect = $request->query('redirect');
+
+        // ✔ jika ada redirect dan bukan dashboard
+        if ($redirect && !str_contains($redirect, '/dashboard')) {
+            return redirect($redirect);
+        }
+
+        // ✔ fallback aman ke landing
+        return redirect()->route('landing.home');
     }
 
     /*
@@ -79,7 +91,7 @@ class PenyewaAuthController extends Controller
             'username' => $request->username,
             'hp'       => $request->hp,
             'alamat'   => $request->alamat,
-            'password' => $request->password,
+            'password' => bcrypt($request->password),
         ]);
 
         return redirect()->route('login.penyewa')
@@ -93,10 +105,11 @@ class PenyewaAuthController extends Controller
     */
     public function logout()
     {
-        Session::flush();
-        Session::invalidate();
-        Session::regenerateToken();
+        session()->forget('penyewa');
+        session()->invalidate();
+        session()->regenerateToken();
 
-        return redirect()->route('login.penyewa');
+        return redirect()->route('landing.home')
+            ->with('success', 'Berhasil logout');
     }
 }

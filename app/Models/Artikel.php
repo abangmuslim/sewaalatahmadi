@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Komentar;
+use App\Models\ModelUser;
 
 class Artikel extends Model
 {
@@ -20,11 +22,13 @@ class Artikel extends Model
 
     public function user()
     {
-        return $this->belongsTo(ModelUser::class, 'iduser');
+        return $this->belongsTo(ModelUser::class, 'iduser', 'iduser');
     }
 
-    public function komentar()
+    // ⬇️ FIX DI SINI (WAJIB)
+    public function komentars()
     {
-        return $this->hasMany(Komentar::class, 'idartikel');
+        return $this->hasMany(Komentar::class, 'idartikel', 'idartikel')
+                    ->latest();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Landing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Artikel;
+use App\Models\Komentar;
 use Illuminate\Http\Request;
 
 class LandingController extends Controller
@@ -19,7 +20,9 @@ class LandingController extends Controller
     // ================= DETAIL ARTIKEL =================
     public function detailArtikel($id)
     {
-        $artikel = Artikel::where('idartikel', $id)->firstOrFail();
+        $artikel = Artikel::with('komentars')
+            ->where('idartikel', $id)
+            ->firstOrFail();
 
         return view('landing.detailartikel', compact('artikel'));
     }
@@ -33,7 +36,6 @@ class LandingController extends Controller
     // ================= KATEGORI =================
     public function kategori($id)
     {
-        // sementara kosong karena artikel belum punya kategori
         $artikels = collect();
 
         return view('landing.kategori', [
@@ -45,7 +47,6 @@ class LandingController extends Controller
     // ================= TAG =================
     public function tag($tag)
     {
-        // sementara kosong karena belum ada kolom tag
         $artikels = collect();
 
         return view('landing.tag', compact('artikels', 'tag'));
@@ -67,5 +68,32 @@ class LandingController extends Controller
     public function daftarIsi()
     {
         return view('landing.daftarisi');
+    }
+
+    // ================= KOMENTAR =================
+    public function storeKomentar(Request $request)
+    {
+        $request->validate([
+            'idartikel' => 'required',
+            'isi' => 'required|string|min:3|max:1000',
+        ]);
+
+        // CEK LOGIN
+        if (!session()->has('user') && !session()->has('penyewa')) {
+            return redirect()
+                ->route('login.user', ['redirect' => url()->previous()])
+                ->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        // SIMPAN KOMENTAR
+        Komentar::create([
+            'idartikel' => $request->idartikel,
+            'idpenyewa' => session('penyewa.idpenyewa') ?? null,
+            'isi' => $request->isi,
+        ]);
+
+        return redirect()
+            ->route('landing.detailartikel', $request->idartikel)
+            ->with('success', 'Komentar berhasil dikirim');
     }
 }

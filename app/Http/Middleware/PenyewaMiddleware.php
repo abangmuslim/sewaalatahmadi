@@ -11,7 +11,7 @@ class PenyewaMiddleware
 {
     public function handle($request, Closure $next)
     {
-        if (!session('login') || session('guard') !== 'penyewa') {
+        if (!session()->has('penyewa')) {
             return redirect()->route('login.penyewa');
         }
 

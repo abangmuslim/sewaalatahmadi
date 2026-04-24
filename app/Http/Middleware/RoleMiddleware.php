@@ -10,20 +10,20 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        // cek login
+        // ❗ Belum login
         if (!Auth::check()) {
             return redirect()->route('login.user');
         }
 
-        // ambil role user
-        $userRole = strtolower(Auth::user()->role);
+        // ❗ Normalisasi role user
+        $userRole = trim(strtolower(Auth::user()->role));
 
-        // normalisasi roles dari parameter middleware
-        $roles = array_map(fn($r) => strtolower(trim($r)), $roles);
+        // ❗ Normalisasi role yang diizinkan
+        $roles = array_map(fn($r) => trim(strtolower($r)), $roles);
 
-        // cek akses role
+        // ❗ Jika role tidak sesuai
         if (!in_array($userRole, $roles)) {
-            abort(403, 'Anda tidak memiliki akses');
+            abort(403);
         }
 
         return $next($request);
